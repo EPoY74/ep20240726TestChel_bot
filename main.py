@@ -7,14 +7,13 @@ from webbrowser import open as web_open
 
 from telebot import TeleBot
 
-
-
-MY_TELEGRAM_API='7341698907:AAGlo8L4epgwUtOyXo31x-6wF4eVMRBmlj8'
+# noinspection SpellCheckingInspection
+MY_TELEGRAM_API = '7341698907:AAGlo8L4epgwUtOyXo31x-6wF4eVMRBmlj8'
 bot = TeleBot(MY_TELEGRAM_API)
 
 
 @bot.message_handler(commands=["start", "main"])
-def start_bot(message):
+def start_bot(message) -> None:
     """
     Обработка команд start and stop
     :param message:
@@ -25,7 +24,7 @@ def start_bot(message):
 
 # Обрабатываю команду help
 @bot.message_handler(commands=["help"])
-def help_info(message):
+def help_info(message) -> None:
     """
     PRocessing help command
     :param message:
@@ -38,8 +37,8 @@ def help_info(message):
 
 
 # Обрабатываю команду message_sys_info
-@bot.message_handler(commands = ["message_sys_info"])
-def message_sys_info(message):
+@bot.message_handler(commands=["message_sys_info"])
+def message_sys_info(message) -> None:
     """
     Processing command message_sys_info.
     This command dumps the entire message to the chat.
@@ -48,10 +47,9 @@ def message_sys_info(message):
 
 
 @bot.message_handler(commands=["site", "website"])
-def send_site(massage):
+def send_site() -> None:
     """
     Send to user our website
-    :param massage:
     :return:
     """
     web_open("mail.ru")
