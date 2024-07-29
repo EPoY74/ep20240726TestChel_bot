@@ -45,7 +45,7 @@ def message_sys_info(message) -> None:
          """
     bot.send_message(message.chat.id, message)
 
-
+# Отправляем пользователю ссылку на сайт
 @bot.message_handler(commands=["site", "website"])
 def send_site() -> None:
     """
@@ -54,6 +54,19 @@ def send_site() -> None:
     """
     web_open("mail.ru")
 
+
+# принимаю фото от пользователя
+@bot.message_handler(content_types=["photo"])
+def grt_photo_file(message):
+    """
+    Gets photo file from user
+    :param message:
+    :return:
+    """
+    #  Вывожу в ответ пользователю описание фото
+    bot.reply_to(message, f"Вы написали: {message.caption}")
+    bot.reply_to(message, "Какое красивое фото!")
+    # print(message)
 
 # Обрабатываю текст введенный пользователе
 # ставить только после обработки всех команд!
