@@ -10,9 +10,7 @@ https://www.youtube.com/watch?v=RpiWnPNTeww
 # Для улучшения быстродействия импортируем только то, используем.
 # Если импортировать всю полностью библиотеку, то каждый раз будет
 # вызываться поиск по библиотеке (насколько я понял)
-from telebot import TeleBot
 from webbrowser import open as web_open
-
 
 # Импортируем файл настроек
 from settings import bot
@@ -65,7 +63,9 @@ def message_sys_info(message) -> None:
 
 # Отправляем пользователю ссылку на сайт
 @bot.message_handler(commands=["site", "website"])
-
+# Пришлось добавить self, так как почему-то начала появляться ошибка,
+# что при отсутствии входящих параметров, функция получает один параметр.
+# Инет сказал, что лечится именно так
 def send_site(self) -> None:
     """
     Send to user our website
