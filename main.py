@@ -11,9 +11,14 @@ https://www.youtube.com/watch?v=RpiWnPNTeww
 # Если импортировать всю полностью библиотеку, то каждый раз будет
 # вызываться поиск по библиотеке (насколько я понял)
 from webbrowser import open as web_open
+from telebot.types import InlineKeyboardButton
+from telebot.types import Message
+from telebot.types import InlineKeyboardMarkup
+from telebot.types import ReplyKeyboardMarkup
+from telebot.types import KeyboardButton
 
 # Импортируем файл настроек
-from settings import bot
+from settings import bot as bot
 
 
 # MY_TELEGRAM_API = '7341698907:AAGlo8L4epgwUtOyXo31x-6wF4eVMRBmlj8'
@@ -24,14 +29,57 @@ from settings import bot
 
 
 
-@bot.message_handler(commands=["start", "main"])
+@bot.message_handler(commands=["start"])
 def start_bot(message) -> None:
     """
-    Обработка команд start and stop
+    Обработка команды start и вывод кнопок под полем
+    текста ввода в telergamm
     :param message:
     :return:
     """
-    bot.send_message(message.chat.id, "Привет")
+    markup = ReplyKeyboardMarkup()
+
+    # Создаю кнопки расположенные в ряд
+    btn1 = KeyboardButton("О проекте")
+    btn2 = KeyboardButton("Сайт проекта")
+    btn3 = KeyboardButton("Контакты")
+
+    # В первом ряду будет одна кнопка
+    markup.row(btn1)
+
+    # Во втором ряду будет 2 кнопки
+    markup.row(btn2, btn3)
+
+    bot.send_message(message.chat.id, "Привет", reply_markup=markup)
+    # регистрируем следующий шаг
+    bot.register_next_step_handler(message, on_click)
+
+
+def on_click(message: Message):
+    """
+    Обрабатываем действия кнопок
+    :return:
+    """
+    # обработка будет происходить только один раз,
+    # так как нет зарегистрированного следующего шага.
+    # Что бы заработало еще раз - нужно заново перезапустить /start
+    if message.text == "О проекте":
+        bot.send_message(message.chat.id, "Обработка 'О проекте' ")
+    elif message.text == "Сайт проекта":
+        bot.send_message(message.chat.id, "Обработка 'Сайт проекта'")
+    elif message.text == "Контакты":
+        bot.send_message(message, "Обработка 'Контакты'")
+
+
+
+@bot.message_handler(commands=["main"])
+def main_bot(message) -> None:
+    """
+    Обработка команды main и вывод приветствия
+    :param message:
+    :return:
+    """
+    bot.send_message(message.chat.id, "Привет! Это основной блок!")
 
 
 # Обрабатываю команду help
@@ -76,16 +124,77 @@ def send_site(self) -> None:
 
 # принимаю фото от пользователя
 @bot.message_handler(content_types=["photo"])
-def grt_photo_file(message):
+def get_photo_file(message):
     """
     Gets photo file from user
     :param message:
     :return:
     """
     #  Вывожу в ответ пользователю описание фото
+
+    # Создаю объект кнопки markup через значение types
+    # InlineKeyboardMarkup() - класс инлайн кнопок
+    markup = InlineKeyboardMarkup()
+
+    # Создаю кнопки расположенные в ряд
+    btn1 = InlineKeyboardButton("Перейти на сайт", url="mail.ru")
+    btn2 = InlineKeyboardButton("Удалить фото", callback_data="delete")
+    btn3 = InlineKeyboardButton("Изменить текст", callback_data="edit")
+
+    # В первом ряду будет одна кнопка
+    markup.row(btn1)
+
+    # Во втором ряду будет 2 кнопки
+    markup.row(btn2, btn3)
+
+    # Через метод add добавляю кнопку
+    markup.add(InlineKeyboardButton(
+        "Перейти на сайт",
+        url="mail.ru"
+    )
+    )
+    # Добавляю вторую кнопку
+    markup.add(InlineKeyboardButton(
+        "Удалить фото",
+        callback_data="delete"
+    )
+    )
+    # Добавляю третью кнопку
+    markup.add(InlineKeyboardButton(
+        "Изменить текст",
+        callback_data="edit"
+    )
+    )
+
     bot.reply_to(message, f"Вы написали: {message.caption}")
-    bot.reply_to(message, "Какое красивое фото!")
+
+    # не зависимо от того, какой метод используется, send_message или reply_to,
+    # кнопку передаем через параметр reply_markup= ,который в качестве
+    # значения получает весь объект markup
+    bot.reply_to(message, "Какое красивое фото!", reply_markup=markup)
     # print(message)
+
+
+# Обрабатываю этим декоратором callback_data
+
+@bot.callback_query_handler(func=lambda callback: True)
+def callback_massage(callback):
+    # Через параметр data обрабатываем именно ранее нажатые
+    # кнопки с callback_data
+    if callback.data == "delete":
+        bot.delete_message(
+            callback.message.chat.id,
+            # Изменяю предыдущее сообщение
+            callback.message.message_id - 1
+        )
+    elif callback.data == "edit":
+        bot.send_message()
+        bot.edit_message_text(
+            "Edit text",
+            callback.message.chat.id,
+            callback.message.message_id
+        )
+
 
 # Обрабатываю текст введенный пользователя
 # ставить только после обработки всех команд!
