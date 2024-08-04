@@ -1,5 +1,6 @@
 # created by virtualenv automatically
 *
 #20240727сб---
-./venv/
+./.venv/
 ./.idea/
+./__pycache__/.
