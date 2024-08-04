@@ -4,8 +4,7 @@
 https://www.youtube.com/watch?v=RpiWnPNTeww
 Библиотека: pyTelegramBotAPI
 """
-from telebot import TeleBot
+import os
 
 # Токен от телеграмм бота
-MY_TELEGRAM_API = '7341698907:AAGlo8L4epgwUtOyXo31x-6wF4eVMRBmlj8'
-bot = TeleBot(MY_TELEGRAM_API)
+MY_TELEGRAM_API = os.getenv("MY_TELEGRAM_API_202407_TEST_BOT")
