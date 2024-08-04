@@ -4,6 +4,9 @@
 Адрес урока (одного из):
 https://www.youtube.com/watch?v=RpiWnPNTeww
 Библиотека: pyTelegramBotAPI
+Bot: @epTestChel_bot
+Ссылка: https://t.me/epTestChel_bot
+
 
 """
 
@@ -11,18 +14,17 @@ https://www.youtube.com/watch?v=RpiWnPNTeww
 # Если импортировать всю полностью библиотеку, то каждый раз будет
 # вызываться поиск по библиотеке (насколько я понял)
 from webbrowser import open as web_open
-from telebot.types import InlineKeyboardButton
-from telebot.types import Message
-from telebot.types import InlineKeyboardMarkup
-from telebot.types import ReplyKeyboardMarkup
-from telebot.types import KeyboardButton
+
+from telebot import TeleBot
+import telebot.types as tt
 
 # Импортируем файл настроек
-from settings import bot as bot
+import settings
+# from  settings
 
 
 # MY_TELEGRAM_API = '7341698907:AAGlo8L4epgwUtOyXo31x-6wF4eVMRBmlj8'
-# bot = TeleBot(MY_TELEGRAM_API)
+bot = TeleBot(settings.MY_TELEGRAM_API)
 
 
 # noinspection SpellCheckingInspection
@@ -30,19 +32,19 @@ from settings import bot as bot
 
 
 @bot.message_handler(commands=["start"])
-def start_bot(message) -> None:
+def start_bot(message: tt.Message) -> None:
     """
     Обработка команды start и вывод кнопок под полем
     текста ввода в telergamm
     :param message:
     :return:
     """
-    markup = ReplyKeyboardMarkup()
+    markup = tt.ReplyKeyboardMarkup()
 
     # Создаю кнопки расположенные в ряд
-    btn1 = KeyboardButton("О проекте")
-    btn2 = KeyboardButton("Сайт проекта")
-    btn3 = KeyboardButton("Контакты")
+    btn1 = tt.KeyboardButton("О проекте")
+    btn2 = tt.KeyboardButton("Сайт проекта")
+    btn3 = tt.KeyboardButton("Контакты")
 
     # В первом ряду будет одна кнопка
     markup.row(btn1)
@@ -55,7 +57,7 @@ def start_bot(message) -> None:
     bot.register_next_step_handler(message, on_click)
 
 
-def on_click(message: Message):
+def on_click(message: tt.Message):
     """
     Обрабатываем действия кнопок
     :return:
@@ -68,7 +70,7 @@ def on_click(message: Message):
     elif message.text == "Сайт проекта":
         bot.send_message(message.chat.id, "Обработка 'Сайт проекта'")
     elif message.text == "Контакты":
-        bot.send_message(message, "Обработка 'Контакты'")
+        bot.send_message(message.chat.id, "Обработка 'Контакты'")
 
 
 
@@ -134,12 +136,12 @@ def get_photo_file(message):
 
     # Создаю объект кнопки markup через значение types
     # InlineKeyboardMarkup() - класс инлайн кнопок
-    markup = InlineKeyboardMarkup()
+    markup = tt.InlineKeyboardMarkup()
 
     # Создаю кнопки расположенные в ряд
-    btn1 = InlineKeyboardButton("Перейти на сайт", url="mail.ru")
-    btn2 = InlineKeyboardButton("Удалить фото", callback_data="delete")
-    btn3 = InlineKeyboardButton("Изменить текст", callback_data="edit")
+    btn1 = tt.InlineKeyboardButton("Перейти на сайт", url="mail.ru")
+    btn2 = tt.InlineKeyboardButton("Удалить фото", callback_data="delete")
+    btn3 = tt.InlineKeyboardButton("Изменить текст", callback_data="edit")
 
     # В первом ряду будет одна кнопка
     markup.row(btn1)
@@ -148,19 +150,19 @@ def get_photo_file(message):
     markup.row(btn2, btn3)
 
     # Через метод add добавляю кнопку
-    markup.add(InlineKeyboardButton(
+    markup.add(tt.InlineKeyboardButton(
         "Перейти на сайт",
         url="mail.ru"
     )
     )
     # Добавляю вторую кнопку
-    markup.add(InlineKeyboardButton(
+    markup.add(tt.InlineKeyboardButton(
         "Удалить фото",
         callback_data="delete"
     )
     )
     # Добавляю третью кнопку
-    markup.add(InlineKeyboardButton(
+    markup.add(tt.InlineKeyboardButton(
         "Изменить текст",
         callback_data="edit"
     )
@@ -188,7 +190,6 @@ def callback_massage(callback):
             callback.message.message_id - 1
         )
     elif callback.data == "edit":
-        bot.send_message()
         bot.edit_message_text(
             "Edit text",
             callback.message.chat.id,
