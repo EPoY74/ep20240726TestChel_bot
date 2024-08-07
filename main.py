@@ -23,7 +23,6 @@ import psycopg2 as psy
 # Импортируем файл настроек
 import settings
 
-
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
 
@@ -43,11 +42,11 @@ def connect_to_db() -> psy.connect:
     try:
         print(f"Подключение к БД {getting_time()}")
         with psy.connect(
-            dbname="ep20240806test",
-            user="postgres",
-            password="Postgres",
-            host="localhost",
-            port="5432",
+                dbname="ep20240806test",
+                user="postgres",
+                password="Postgres",
+                host="localhost",
+                port="5432",
         ) as con:
             print(f"БД подключена {getting_time()}")
         return con
@@ -85,10 +84,11 @@ def start_bot(message: tt.Message) -> None:
     # Открываю файл на чтение в двоичносм(не текстовом) режиме,
     # буду отправлять фото.
     # Видео, аудио, отправляется аналогияно, только с помощью других методов
-    with open ("./photos/8_03_24.jpg", "rb") as photo_file:
-        bot.send_photo(message.chat.id, photo_file, reply_markup=markup )
+    with open("./photos/8_03_24.jpg", "rb") as photo_file:
+        bot.send_photo(message.chat.id, photo_file, reply_markup=markup)
     # photo_file = open ("./photos/8-03-24.jpg", "rb")
     bot.register_next_step_handler(message, on_click)
+
 
 def on_click(message: tt.Message) -> None:
     """
@@ -107,9 +107,6 @@ def on_click(message: tt.Message) -> None:
     elif message.text == "Контакты":
         bot.send_message(message.chat.id, "Обработка 'Контакты'")
         bot.register_next_step_handler(message, on_click)
-    else: return None
-
-
 
 
 @bot.message_handler(commands=["main"])
@@ -134,7 +131,8 @@ def help_info(message) -> None:
     bot.send_message(message.chat.id,
                      "This is <b>help</b>",
                      parse_mode='html'
-    )
+                     )
+
     # Без форматирования
     bot.send_message(message.chat.id, "This is help")
 
@@ -159,6 +157,10 @@ def send_site(self) -> None:
     Send to user our website
     :return:
     """
+    # Что бы не ругался линтер
+    if self:
+        pass
+
     web_open("mail.ru")
 
 
@@ -256,8 +258,8 @@ def processing_user_text(message):
     """
     if message.text.lower() == "привет":
         bot.send_message(
-                         message.chat.id,
-                    f"Привет {message.from_user.first_name}"
+            message.chat.id,
+            f"Привет {message.from_user.first_name}"
         )
     elif message.text.lower() == "id":
         # Так отвечаем нп конкретное сообщение
