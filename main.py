@@ -14,21 +14,46 @@ Bot: @epTestChel_bot
 # Если импортировать всю полностью библиотеку, то каждый раз будет
 # вызываться поиск по библиотеке (насколько я понял)
 from webbrowser import open as web_open
+import time
 
 from telebot import TeleBot
 import telebot.types as tt
+import psycopg2 as psy
 
 # Импортируем файл настроек
 import settings
-# from  settings
 
 
-# MY_TELEGRAM_API = '7341698907:AAGlo8L4epgwUtOyXo31x-6wF4eVMRBmlj8'
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
 
-# noinspection SpellCheckingInspection
+def getting_time() -> time.struct_time:
+    """
+    Возвращает текущее время в неформатированном виде
+    :return:
+    """
+    return time.localtime(time.time())
 
+
+def connect_to_db() -> psy.connect:
+    """
+    Соединение с БД PostgresQL
+    :return:
+    """
+    try:
+        print(f"Подключение к БД {getting_time()}")
+        with psy.connect(
+            dbname="ep20240806test",
+            user="postgres",
+            password="Postgres",
+            host="localhost",
+            port="5432",
+        ) as con:
+            print(f"БД подключена {getting_time()}")
+        return con
+    except psy.Error as err:
+        print(f"Ошибка: \n:{err}\n{getting_time()}")
+        raise err
 
 
 @bot.message_handler(commands=["start"])
@@ -39,10 +64,11 @@ def start_bot(message: tt.Message) -> None:
     :param message:
     :return:
     """
-    markup = tt.ReplyKeyboardMarkup()
+    markup = tt.ReplyKeyboardMarkup(resize_keyboard=True)
 
-    # Создаю кнопки расположенные в ряд
-    btn1 = tt.KeyboardButton("О проекте")
+    # Создаю кнопки
+    # Будут расположены под текстовым полем ввода
+    btn1 = tt.KeyboardButton("🤯О проекте🤯")
     btn2 = tt.KeyboardButton("Сайт проекта")
     btn3 = tt.KeyboardButton("Контакты")
 
@@ -52,12 +78,19 @@ def start_bot(message: tt.Message) -> None:
     # Во втором ряду будет 2 кнопки
     markup.row(btn2, btn3)
 
+    # Отправляю привет и названеи нажаттй кнопки в чат для дальнейшей обработки
     bot.send_message(message.chat.id, "Привет", reply_markup=markup)
-    # регистрируем следующий шаг
+    # регистрируем следующий шаг, это какая функция будет вызвана
+
+    # Открываю файл на чтение в двоичносм(не текстовом) режиме,
+    # буду отправлять фото.
+    # Видео, аудио, отправляется аналогияно, только с помощью других методов
+    with open ("./photos/8_03_24.jpg", "rb") as photo_file:
+        bot.send_photo(message.chat.id, photo_file, reply_markup=markup )
+    # photo_file = open ("./photos/8-03-24.jpg", "rb")
     bot.register_next_step_handler(message, on_click)
 
-
-def on_click(message: tt.Message):
+def on_click(message: tt.Message) -> None:
     """
     Обрабатываем действия кнопок
     :return:
@@ -65,12 +98,17 @@ def on_click(message: tt.Message):
     # обработка будет происходить только один раз,
     # так как нет зарегистрированного следующего шага.
     # Что бы заработало еще раз - нужно заново перезапустить /start
-    if message.text == "О проекте":
+    if message.text.find("О проекте") != -1:
         bot.send_message(message.chat.id, "Обработка 'О проекте' ")
+        bot.register_next_step_handler(message, on_click)
     elif message.text == "Сайт проекта":
         bot.send_message(message.chat.id, "Обработка 'Сайт проекта'")
+        bot.register_next_step_handler(message, on_click)
     elif message.text == "Контакты":
         bot.send_message(message.chat.id, "Обработка 'Контакты'")
+        bot.register_next_step_handler(message, on_click)
+    else: return None
+
 
 
 
@@ -181,6 +219,11 @@ def get_photo_file(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_massage(callback):
+    """
+
+    :param callback:
+    :return:
+    """
     # Через параметр data обрабатываем именно ранее нажатые
     # кнопки с callback_data
     if callback.data == "delete":
@@ -222,4 +265,7 @@ def processing_user_text(message):
 
 
 if __name__ == "__main__":
+    print(f"Start bot at {getting_time()}")
+    connection = connect_to_db()
+    curs_db = connect_to_db().cursor
     bot.infinity_polling()
