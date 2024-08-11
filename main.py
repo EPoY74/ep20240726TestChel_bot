@@ -39,7 +39,6 @@ def connect_to_db() -> psy.connect:
     Соединение с БД PostgresQL
     :return:
     """
-    con = None
     try:
         print(f"Подключение к БД {getting_time()}")
         con = psy.connect(
@@ -54,11 +53,6 @@ def connect_to_db() -> psy.connect:
     except psy.Error as err:
         print(f"Ошибка: \n:{err}\n{getting_time()}")
         raise err
-    # finally:
-    #     if con:
-    #         con.close()
-    #         print(f"Соединение с БД закрыто. {getting_time()} ")
-
 
 
 @bot.message_handler(commands=["start"])
