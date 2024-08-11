@@ -39,20 +39,26 @@ def connect_to_db() -> psy.connect:
     Соединение с БД PostgresQL
     :return:
     """
+    con = None
     try:
         print(f"Подключение к БД {getting_time()}")
-        with psy.connect(
+        con = psy.connect(
                 dbname="ep20240806test",
                 user="postgres",
                 password="Postgres",
                 host="localhost",
                 port="5432",
-        ) as con:
-            print(f"БД подключена {getting_time()}")
+        )
+        print(f"БД подключена {getting_time()}")
         return con
     except psy.Error as err:
         print(f"Ошибка: \n:{err}\n{getting_time()}")
         raise err
+    # finally:
+    #     if con:
+    #         con.close()
+    #         print(f"Соединение с БД закрыто. {getting_time()} ")
+
 
 
 @bot.message_handler(commands=["start"])
@@ -267,7 +273,12 @@ def processing_user_text(message):
 
 
 if __name__ == "__main__":
-    print(f"Start bot at {getting_time()}")
-    connection = connect_to_db()
-    curs_db = connect_to_db().cursor
+    # print(f"Start bot at {getting_time()}")
+    # connection = connect_to_db()
+    conn = connect_to_db()
+    curs_db = conn.cursor
     bot.infinity_polling()
+    curs_db.close()
+    print(f"Cursor is closed {getting_time()}")
+    # conn.close()
+    input("Press any key...")
