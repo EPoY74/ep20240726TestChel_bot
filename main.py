@@ -1,4 +1,4 @@
-"""
+﻿"""
 Пишу телеграмм бота
 Это учебный проект.
 Адрес урока (одного из):
@@ -15,6 +15,7 @@ Bot: @epTestChel_bot
 # вызываться поиск по библиотеке (насколько я понял)
 from webbrowser import open as web_open
 import time
+from typing import List
 
 from telebot import TeleBot
 import telebot.types as tt
@@ -26,15 +27,23 @@ import settings
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
 
-def getting_time() -> time.struct_time:
+def getting_time() -> List:
     """
     Возвращает текущее время в неформатированном виде
     :return:
     """
-    return time.localtime(time.time())
+    time_now_get = time.localtime(time.time())
+    time_now_out_get: List = [time_now_get.tm_mday,
+                              time_now_get.tm_mon,
+                              time_now_get.tm_year,
+                              time_now_get.tm_hour,
+                              time_now_get.tm_min,
+                              time_now_get.tm_sec,
+                              ]
+    return time_now_out_get
 
 
-def connect_to_db() -> psy.connect:
+def write_to_db(sql_con: str):
     """
     Соединение с БД PostgresQL
     :return:
@@ -49,10 +58,16 @@ def connect_to_db() -> psy.connect:
                 port="5432",
         )
         print(f"БД подключена {getting_time()}")
-        return con
+        with con.cursor() as curr:
+            curr.execute(sql_con)
+            con.commit()
+            print(f"Запрос {sql_con} выполнен в {getting_time()}")
+        con.close()
+        print(f"Connection is closed {getting_time()}")
     except psy.Error as err:
         print(f"Ошибка: \n:{err}\n{getting_time()}")
         raise err
+
 
 
 @bot.message_handler(commands=["start"])
@@ -63,6 +78,17 @@ def start_bot(message: tt.Message) -> None:
     :param message:
     :return:
     """
+    slq_query = """
+    CREATE TABLE IF NOT EXISTS telegramm_user (
+    id SERIAL PRIMARY KEY,
+    telegramm_id varchar(20) NOT NULL,
+    telegramm_firstname varchar(40) NOT NULL,
+    telegramm_lastname varchar(40) NOT NULL,
+    started_date timestamp NOT NULL
+    );
+    """
+    write_to_db(slq_query)
+
     markup = tt.ReplyKeyboardMarkup(resize_keyboard=True)
 
     # Создаю кнопки
@@ -267,12 +293,5 @@ def processing_user_text(message):
 
 
 if __name__ == "__main__":
-    # print(f"Start bot at {getting_time()}")
-    # connection = connect_to_db()
-    conn = connect_to_db()
-    curs_db = conn.cursor
+    print(f"Start bot at {getting_time()}")
     bot.infinity_polling()
-    curs_db.close()
-    print(f"Cursor is closed {getting_time()}")
-    # conn.close()
-    input("Press any key...")
