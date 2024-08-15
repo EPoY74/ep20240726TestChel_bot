@@ -45,7 +45,8 @@ def getting_time() -> List:
 
 def write_to_db(sql_con: str):
     """
-    Соединение с БД PostgresQL
+    Запись запроса в БД PostgresQL
+    sql_con: - запрос в БД
     :return:
     """
     try:
