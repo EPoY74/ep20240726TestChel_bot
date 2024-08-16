@@ -70,13 +70,13 @@ def write_to_db(sql_query_con: str):
         raise err
 
 
-
-@bot.message_handler(commands=["start"])
-def start_bot(message: tt.Message) -> None:
+def make_first_start_table():
     """
-    Обработка команды start и вывод кнопок под полем
-    текста ввода в telergamm
-    :param message:
+    Делает первую таблицу при запуске бота.
+    НА самом деле, я думаю, она не нужна -  лишнее обращение
+    и лишняя нагрузка на сервер.
+    То есть, БД можно сделать заранее или вручную или
+    написав отдельные скрипты.
     :return:
     """
     slq_query = """
@@ -90,10 +90,26 @@ def start_bot(message: tt.Message) -> None:
     """
     write_to_db(slq_query)
 
+
+@bot.message_handler(commands=["start"])
+def start_bot(message: tt.Message) -> None:
+    """
+    Обработка команды start и вывод кнопок под полем
+    текста ввода в telergam
+    :param message:
+    :return:
+    """
+    make_first_start_table()
+
+    print(bot.user.id)
+    print(bot.user)
+    print(20 * "-")
+    print(message.from_user)
+
     markup = tt.ReplyKeyboardMarkup(resize_keyboard=True)
 
     # Создаю кнопки
-    # Будут расположены под текстовым полем ввода
+    # будут расположены под текстовым полем ввода
     btn1 = tt.KeyboardButton("🤯О проекте🤯")
     btn2 = tt.KeyboardButton("Сайт проекта")
     btn3 = tt.KeyboardButton("Контакты")
@@ -293,6 +309,14 @@ def processing_user_text(message):
         bot.reply_to(message, f"id: {message.from_user.id}")
 
 
-if __name__ == "__main__":
+def main():
+    """
+    Основной блок программы.
+    :return:
+    """
     print(f"Start bot at {getting_time()}")
     bot.infinity_polling()
+
+
+if __name__ == "__main__":
+    main()
