@@ -43,7 +43,7 @@ def getting_time() -> List:
     return time_now_out_get
 
 
-def write_to_db(sql_con: str):
+def write_to_db(sql_query_con: str):
     """
     Запись запроса в БД PostgresQL
     sql_con: - запрос в БД
@@ -60,9 +60,9 @@ def write_to_db(sql_con: str):
         )
         print(f"БД подключена {getting_time()}")
         with con.cursor() as curr:
-            curr.execute(sql_con)
+            curr.execute(sql_query_con)
             con.commit()
-            print(f"Запрос {sql_con} выполнен в {getting_time()}")
+            print(f"Запрос {sql_query_con} выполнен в {getting_time()}")
         con.close()
         print(f"Connection is closed {getting_time()}")
     except psy.Error as err:
