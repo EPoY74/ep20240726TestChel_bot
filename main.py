@@ -96,9 +96,10 @@ def make_first_start_table():
     sql_query = """
     CREATE TABLE IF NOT EXISTS telegramm_user (
     id SERIAL PRIMARY KEY,
-    telegramm_username varchar(32) NOT NULL,
-    telegramm_firstname varchar(100) NOT NULL,
-    telegramm_lastname varchar(100) NOT NULL,
+    telegramm_username varchar(32),
+    telegramm_id INTEGER NOT NULL,
+    telegramm_firstname varchar(100),
+    telegramm_lastname varchar(100),
     started_date timestamp NOT NULL
     );
     """
