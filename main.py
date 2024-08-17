@@ -15,6 +15,7 @@ Bot: @epTestChel_bot
 # вызываться поиск по библиотеке (насколько я понял)
 from webbrowser import open as web_open
 import time
+import datetime
 from typing import List
 
 from telebot import TeleBot
@@ -26,6 +27,14 @@ import settings
 
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
+
+def divide_line(length: int):
+    """Выводит разделительную линию длинной lebgth в консаль
+
+    Args:
+        length (int): длинна разделительной линии
+    """
+    print (length * "-")
 
 def getting_time() -> List:
     """
@@ -63,8 +72,9 @@ def write_to_db(sql_query_con: str):
             curr.execute(sql_query_con)
             con.commit()
             print(f"Запрос {sql_query_con} выполнен в {getting_time()}")
-        con.close()
+            con.close()
         print(f"Connection is closed {getting_time()}")
+        divide_line(50)
     except psy.Error as err:
         print(f"Ошибка: \n:{err}\n{getting_time()}")
         raise err
@@ -79,16 +89,65 @@ def make_first_start_table():
     написав отдельные скрипты.
     :return:
     """
-    slq_query = """
+    # sql_query ="""
+    # DROP TABLE telegramm_user
+    # """
+    # write_to_db(sql_query)
+    sql_query = """
     CREATE TABLE IF NOT EXISTS telegramm_user (
     id SERIAL PRIMARY KEY,
-    telegramm_id varchar(20) NOT NULL,
-    telegramm_firstname varchar(40) NOT NULL,
-    telegramm_lastname varchar(40) NOT NULL,
+    telegramm_username varchar(32) NOT NULL,
+    telegramm_firstname varchar(100) NOT NULL,
+    telegramm_lastname varchar(100) NOT NULL,
     started_date timestamp NOT NULL
     );
     """
-    write_to_db(slq_query)
+    write_to_db(sql_query)
+
+def write_users_data_to_db(message_wri: tt.Message):
+    """
+    Записывает данные пользователя, запустившего
+    бот комендой /start 
+
+    Args:
+        message (_type_): _description_
+    """
+
+    user_name = message_wri.from_user.username
+    first_name = message_wri.from_user.first_name
+    last_name = message_wri.from_user.last_name
+    user_id = message_wri.from_user.id
+    # Похоже буду использовать типы самой БД
+    started_date_wri = datetime.datetime.now()
+
+    sql_query = """
+    INSERT INTO telegramm_user 
+    (telegramm_username, telegramm_firstname, telegramm_lastname, telegramm_id, started_date)
+    VALUES
+    (%s, %s, %s, %s, %s);
+    """
+    # write_to_db(sql_query)
+
+    try:
+        print(f"Подключение к БД {getting_time()}")
+        con = psy.connect(
+                dbname="ep20240806test",
+                user="postgres",
+                password="Postgres",
+                host="localhost",
+                port="5432",
+        )
+        print(f"БД подключена {getting_time()}")
+        with con.cursor() as curr:
+            curr.execute(sql_query, (user_name, first_name, last_name, user_id, started_date_wri))
+            con.commit()
+            print(f"Запрос {sql_query} выполнен в {getting_time()}")
+        con.close()
+        print(f"Connection is closed {getting_time()}")
+        divide_line(50)
+    except psy.Error as err:
+        print(f"Ошибка: \n:{err}\n{getting_time()}")
+        raise err
 
 
 @bot.message_handler(commands=["start"])
@@ -99,7 +158,11 @@ def start_bot(message: tt.Message) -> None:
     :param message:
     :return:
     """
-    make_first_start_table()
+    # ЗАкоментировал, так как таблица уже готова
+    # Что бы избежать лишних и ненужных запросов
+    # make_first_start_table()
+
+    write_users_data_to_db(message)
 
     print(bot.user.id)
     print(bot.user)
@@ -204,7 +267,7 @@ def send_site(self) -> None:
     if self:
         pass
 
-    web_open("mail.ru")
+    web_open("https://www.укпривилегия.рф/")
 
 
 # принимаю фото от пользователя
