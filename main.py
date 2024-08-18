@@ -118,7 +118,6 @@ def write_users_data_to_db(message_wri: tt.Message):
     first_name = message_wri.from_user.first_name
     last_name = message_wri.from_user.last_name
     user_id = message_wri.from_user.id
-    # Похоже буду использовать типы самой БД
     started_date_wri = datetime.datetime.now()
 
     sql_query = """
