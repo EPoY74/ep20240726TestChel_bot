@@ -193,15 +193,7 @@ def write_users_data_to_db(message_wri: tt.Message):
     # write_to_db(sql_query)
 
     try:
-        print(f"Подключение к БД {getting_time()}")
-        con = psy.connect(
-                dbname="ep20240806test",
-                user="postgres",
-                password="Postgres",
-                host="localhost",
-                port="5432",
-        )
-        print(f"БД подключена {getting_time()}")
+        con = connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
         with con.cursor() as curr:
             curr.execute(sql_query, (user_name, first_name, last_name, user_id, started_date_wri))
             con.commit()
