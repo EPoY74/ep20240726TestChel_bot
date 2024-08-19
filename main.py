@@ -71,6 +71,7 @@ def divide_line(length: int = 30):
 
     Args:
         length (int): длинна разделительной линии
+        Значение по умолчанию 30
     """
     print (length * "-")
 
