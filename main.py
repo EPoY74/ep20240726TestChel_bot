@@ -101,8 +101,6 @@ def fixing_launch_bot():
 
 def divide_line(length: int = 30):
     """Выводит разделительную линию длинной length в консоль
-
-
     Args:
         length (int): длинна разделительной линии
         Значение по умолчанию 30
