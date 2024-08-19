@@ -130,15 +130,7 @@ def write_to_db(sql_query_con: str):
     :return:
     """
     try:
-        print(f"Подключение к БД {getting_time()}")
-        con = psy.connect(
-                dbname="ep20240806test",
-                user="postgres",
-                password="Postgres",
-                host="localhost",
-                port="5432",
-        )
-        print(f"БД подключена {getting_time()}")
+        con = connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
         with con.cursor() as curr:
             curr.execute(sql_query_con)
             con.commit()
