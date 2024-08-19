@@ -28,6 +28,13 @@ import settings
 # Создаем экземляр класса TeleBot, настройки берем из переменных окружения
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
+# Из переменных окружения получаем параметры подключения к БД
+BOT_DB_NAME = settings.MY_TELEGRAM_BOT_DBNAME
+BOT_DB_USER = settings.MY_TELEGRAM_BOT_USER
+BOT_DB_PASSWORD = settings.MY_TELEGRAM_BOT_PASSWORD
+BOT_DB_HOST = settings.BOT_MY_TELEGRAM_BOT_HOST
+BOT_DB_PORT = settings.MY_TELEGRAM_BOT_PORT
+
 
 def fixing_launch_bot():
     """
