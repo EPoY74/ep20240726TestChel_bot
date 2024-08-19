@@ -111,6 +111,4 @@ if __name__ == "__main__":
     # telegramm user - таблица запустивших бота
     # telegramm_bogt_start - таблица с запусками бота
     print(f"Диспетчер запустил программу в {getting_time()}")
-    results = get_table_datas('telegramm_user')
-    for result in results:
-        print(result)
+    print_table_datas('telegramm_user')
