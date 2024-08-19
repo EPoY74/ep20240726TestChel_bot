@@ -86,7 +86,7 @@ def read_all_from_db(sql_con: str):
 
 def get_table_datas(table_name: str):
     """
-    Читаю название таблицы 
+    Читаю данные из таблицы {table_name}
     """
     sql_query = f"""
     SELECT
