@@ -96,6 +96,16 @@ def get_table_datas(table_name: str):
     """
     return read_all_from_db(sql_query)
 
+def print_table_datas(table_name_pri: str):
+    """
+    Выводит в консоль значения строк таблицы table_name_pri
+    :param table_name_pri:  - имя таблицы, к которой обращается
+    :return:
+    """
+    results = get_table_datas(table_name_pri)
+    for result in results:
+        print(result)
+
 
 if __name__ == "__main__":
     print(f"Диспетчер запустил программу в {getting_time()}")
