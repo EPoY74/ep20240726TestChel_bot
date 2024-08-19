@@ -108,6 +108,8 @@ def print_table_datas(table_name_pri: str):
 
 
 if __name__ == "__main__":
+    # telegramm user - таблица запустивших бота
+    # telegramm_bogt_start - таблица с запусками бота
     print(f"Диспетчер запустил программу в {getting_time()}")
     results = get_table_datas('telegramm_user')
     for result in results:
