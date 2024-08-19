@@ -5,11 +5,12 @@
 Почта: p174@mail.ru
 Дата: 20240817
 """
-from datetime import time
+# from datetime import time
 from typing import List
 import time
 
 import psycopg2 as psy
+
 
 def divide_line(length: int):
     """Выводит разделительную линию длинной length в консоль
@@ -66,16 +67,30 @@ def write_to_db(sql_query_con: str):
 
 
 if __name__ == "__main__":
-    ep_sql_query = """
-     ALTER TABLE
-      telegramm_user 
-     ALTER COLUMN
-      telegramm_id
-     SET
-      NOT NULL
+
+    EP_SQL = """
+    ALTER TABLE telegramm_bot_start
+    RENAME TO
+    telegramm_bot_start;
      """
 
-    write_to_db(ep_sql_query)
+    write_to_db(EP_SQL)
+
+    # Переименование таблицы в БД
+    # ep_sql_query = """
+    #     ALTER TABLE telegramm_bogt_start
+    #     RENAME TO
+    #     telegramm_bot_start;
+    #      """
+
+    # Создал таблицу, для записи времени старта телеграмм бота.
+    # Она будет записываться самой первой и тем проверять, работает ли БД
+    # ep_sql_query = """
+    #     CREATE TABLE telegramm_bot_start (
+    #     id SERIAL PRIMARY KEY,
+    #     started_datetime timestamp NOT NULL
+    #     )
+    #      """
 
     #  Добавляю проверку NOT NULL
     # ep_sql_query = """
@@ -93,7 +108,6 @@ if __name__ == "__main__":
     #   ADD COLUMN
     #   telegramm_id INTEGER;
     #   """
-
 
     #  Убираю NOT NULL в поле
     # ep_sql_query = """
