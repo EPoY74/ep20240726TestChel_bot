@@ -28,8 +28,46 @@ import settings
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
 
-def divide_line(length: int):
-    """Выводит разделительную линию длинной lebgth в консаль
+def fixing_launch_bot():
+    """
+    Фиксирует время старта бота.
+    Побочно проверяем доступность БД для записи
+    :return:
+    """
+    start_bot_time = datetime.datetime.now()
+    sql_query = """
+    INSERT INTO telegramm_bot_start 
+    (started_datetime)
+    VALUES
+    (%s)
+    """
+    try:
+        print(f"Подключение к БД {getting_time()}")
+        con = psy.connect(
+                dbname="ep20240806test",
+                user="postgres",
+                password="Postgres",
+                host="localhost",
+                port="5432",
+        )
+        print(f"БД подключена {getting_time()}")
+        with con.cursor() as curr:
+            curr.execute(sql_query, (start_bot_time,))
+            con.commit()
+            print(f"Запрос {sql_query} выполнен в {getting_time()}")
+        con.close()
+        print(f"Connection is closed {getting_time()}")
+        divide_line(50)
+        print(f"Start bot at {start_bot_time}")
+        divide_line()
+    except psy.Error as err:
+        print(f"Ошибка: \n:{err}\n{getting_time()}")
+        raise err
+
+
+def divide_line(length: int = 30):
+    """Выводит разделительную линию длинной length в консоль
+
 
     Args:
         length (int): длинна разделительной линии
@@ -104,6 +142,7 @@ def make_first_start_table():
     );
     """
     write_to_db(sql_query)
+
 
 def write_users_data_to_db(message_wri: tt.Message):
     """
@@ -377,7 +416,7 @@ def main():
     Основной блок программы.
     :return:
     """
-    print(f"Start bot at {getting_time()}")
+    fixing_launch_bot()
     bot.infinity_polling()
 
 
