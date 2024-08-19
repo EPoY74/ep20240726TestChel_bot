@@ -25,6 +25,7 @@ import psycopg2 as psy
 # Импортируем файл настроек
 import settings
 
+# Создаем экземляр класса TeleBot, настройки берем из переменных окружения
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
 
