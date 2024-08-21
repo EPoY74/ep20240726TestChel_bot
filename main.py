@@ -172,10 +172,11 @@ def make_first_start_table():
 def write_users_data_to_db(message_wri: tt.Message):
     """
     Записывает данные пользователя, запустившего
-    бот комендой /start 
+    бот командой /start
 
-    Args:
-        message (_type_): _description_
+    :param message_wri: экземпляр объекта TeleBot Message содержащий
+     сообщение от пользователя
+    :return:  None
     """
 
     user_name = message_wri.from_user.username
