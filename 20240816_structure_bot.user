@@ -1,0 +1,16 @@
+{
+'id': 7341698907,
+'is_bot': True,
+'first_name': 'Test Chel Bot',
+'username': 'epTestChel_bot',
+'last_name': None,
+'language_code': None,
+'can_join_groups': True,
+'can_read_all_group_messages': False,
+'supports_inline_queries': False,
+'is_premium': None,
+'added_to_attachment_menu': None,
+'can_connect_to_business': False
+}
+
+
