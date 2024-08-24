@@ -6,7 +6,7 @@ https://www.youtube.com/watch?v=RpiWnPNTeww
 Библиотека: pyTelegramBotAPI
 Bot: @epTestChel_bot
 Ссылка: https://t.me/epTestChel_bot
-Тестирование авторефреша в git
+Тестирование авторефреша в git 2
 """
 
 # Для улучшения быстродействия импортируем только то, используем.
