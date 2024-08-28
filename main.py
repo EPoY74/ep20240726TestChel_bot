@@ -6,7 +6,6 @@ https://www.youtube.com/watch?v=RpiWnPNTeww
 Библиотека: pyTelegramBotAPI
 Bot: @epTestChel_bot
 Ссылка: https://t.me/epTestChel_bot
-Тестирование авторефреша в git 2
 """
 
 # Для улучшения быстродействия импортируем только то, используем.
@@ -23,8 +22,9 @@ import psycopg2 as psy
 
 # Импортируем файл настроек
 import settings
+import work_postgresql as wdb
 
-# Создаем экземляр класса TeleBot, настройки берем из переменных окружения
+# Создаем экзмпляр класса TeleBot, настройки берем из переменных окружения
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
 # Из переменных окружения получаем параметры подключения к БД
@@ -35,39 +35,21 @@ BOT_DB_HOST = settings.MY_TELEGRAM_BOT_HOST
 BOT_DB_PORT = settings.MY_TELEGRAM_BOT_PORT
 
 
-def connect_to_db(
-        db_name: str,
-        db_user: str,
-        db_pass: str,
-        db_host:str = "localhost",
-        db_port: str = "5432"):
+def getting_time() -> List:
     """
-    Подключается к базе данных с заданными параметрами.
-    Возвращает подключение.
-    ВНИМАНИЕ! Библиотека psycopg2 на 19.08.2024 не закрывает
-     подключения к БД с контекстным менеджером.
-      Обязательно следить за закрытиями соединений
-
-    :param db_name: Имя подключаемой БД
-    :param db_user: Имя пользователя БД
-    :param db_pass: Пароль пользователя БД
-    :param db_host: Хост БД, по умолчанию "localhost"
-    :param db_port: Порт подключения, по умолчанию "5432"
-
-    :return: Подключение к БД
+    Возвращает текущее время в неформатированном виде
+    :return:
     """
-    print(f"Подключение к БД {getting_time()}")
-    connect = psy.connect(
-        dbname=db_name,
-        user=db_user,
-        password=db_pass,
-        host=db_host,
-        port=db_port,
-    )
-    if connect:
-        print(f"БД подключена {getting_time()}")
+    time_now_get = time.localtime(time.time())
+    time_now_out_get: List = [time_now_get.tm_mday,
+                              time_now_get.tm_mon,
+                              time_now_get.tm_year,
+                              time_now_get.tm_hour,
+                              time_now_get.tm_min,
+                              time_now_get.tm_sec,
+                              ]
+    return time_now_out_get
 
-    return connect
 
 def fixing_launch_bot():
     """
@@ -83,7 +65,7 @@ def fixing_launch_bot():
     (%s)
     """
     try:
-        con = connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
+        con = wdb.connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
         with con.cursor() as curr:
             curr.execute(sql_query, (start_bot_time,))
             con.commit()
@@ -106,40 +88,6 @@ def divide_line(length: int = 30):
     """
     print (length * "-")
 
-def getting_time() -> List:
-    """
-    Возвращает текущее время в неформатированном виде
-    :return:
-    """
-    time_now_get = time.localtime(time.time())
-    time_now_out_get: List = [time_now_get.tm_mday,
-                              time_now_get.tm_mon,
-                              time_now_get.tm_year,
-                              time_now_get.tm_hour,
-                              time_now_get.tm_min,
-                              time_now_get.tm_sec,
-                              ]
-    return time_now_out_get
-
-
-def write_to_db(sql_query_con: str):
-    """
-    Запись запроса в БД PostgresQL
-    sql_con: - запрос в БД
-    :return:
-    """
-    try:
-        con = connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
-        with con.cursor() as curr:
-            curr.execute(sql_query_con)
-            con.commit()
-            print(f"Запрос {sql_query_con} выполнен в {getting_time()}")
-            con.close()
-        print(f"Connection is closed {getting_time()}")
-        divide_line(50)
-    except psy.Error as err:
-        print(f"Ошибка: \n:{err}\n{getting_time()}")
-        raise err
 
 
 def make_first_start_table():
@@ -165,7 +113,7 @@ def make_first_start_table():
     started_date timestamp NOT NULL
     );
     """
-    write_to_db(sql_query)
+    wdb.write_to_db(sql_query)
 
 
 def write_users_data_to_db(message_wri: tt.Message):
@@ -193,7 +141,7 @@ def write_users_data_to_db(message_wri: tt.Message):
     # write_to_db(sql_query)
 
     try:
-        con = connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
+        con = wdb.connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
         with con.cursor() as curr:
             curr.execute(sql_query, (user_name, first_name, last_name, user_id, started_date_wri))
             con.commit()
