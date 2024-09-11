@@ -34,25 +34,35 @@ def getting_time() -> time.struct_time:
     return time.localtime(time.time())
 
 
-def connect_to_db() -> psy.connect:
+def connect_to_db(dbname_con: str,
+                  user_con: str,
+                  password_con: str,
+                  host_con: str,
+                  port_con: str) -> psy.connect:
     """
     Соединение с БД PostgresQL
-    :return:
     """
     try:
         print(f"Подключение к БД {getting_time()}")
-        con = psy.connect(
-                dbname="ep20240806test",
-                user="postgres",
-                password="Postgres",
-                host="localhost",
-                port="5432",
+        conn_con = psy.connect(
+                dbname=dbname_con,
+                user=user_con,
+                password=password_con,
+                host=host_con,
+                port=port_con,
         )
         print(f"БД подключена {getting_time()}")
-        return con
+        return conn_con
     except psy.Error as err:
         print(f"Ошибка: \n:{err}\n{getting_time()}")
         raise err
+
+
+def close_connect(conn_close: psy.connect):
+    """
+    Закрывает соединение с БД
+    """
+    conn_close.c
 
 
 @bot.message_handler(commands=["start"])
@@ -269,7 +279,12 @@ def processing_user_text(message):
 if __name__ == "__main__":
     # print(f"Start bot at {getting_time()}")
     # connection = connect_to_db()
-    conn = connect_to_db()
+    conn = connect_to_db(settings.DB_NAME,
+                         settings.USER,
+                         settings.PASSWORD,
+                         settings.HOST,
+                         settings.PORT,
+                         )
     curs_db = conn.cursor
     bot.infinity_polling()
     curs_db.close()
