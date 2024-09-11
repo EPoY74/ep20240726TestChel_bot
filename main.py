@@ -1,4 +1,4 @@
-"""
+﻿"""
 Пишу телеграмм бота
 Это учебный проект.
 Адрес урока (одного из):
@@ -6,8 +6,6 @@ https://www.youtube.com/watch?v=RpiWnPNTeww
 Библиотека: pyTelegramBotAPI
 Bot: @epTestChel_bot
 Ссылка: https://t.me/epTestChel_bot
-
-
 """
 
 # Для улучшения быстродействия импортируем только то, используем.
@@ -15,6 +13,8 @@ Bot: @epTestChel_bot
 # вызываться поиск по библиотеке (насколько я понял)
 from webbrowser import open as web_open
 import time
+import datetime
+from typing import List
 
 from telebot import TeleBot
 import telebot.types as tt
@@ -22,37 +22,133 @@ import psycopg2 as psy
 
 # Импортируем файл настроек
 import settings
+import work_postgresql as wdb
 
+# Создаем экзмпляр класса TeleBot, настройки берем из переменных окружения
 bot = TeleBot(settings.MY_TELEGRAM_API)
 
+# Из переменных окружения получаем параметры подключения к БД
+BOT_DB_NAME = settings.MY_TELEGRAM_BOT_DBNAME
+BOT_DB_USER = settings.MY_TELEGRAM_BOT_USER
+BOT_DB_PASSWORD = settings.MY_TELEGRAM_BOT_PASSWORD
+BOT_DB_HOST = settings.MY_TELEGRAM_BOT_HOST
+BOT_DB_PORT = settings.MY_TELEGRAM_BOT_PORT
 
-def getting_time() -> time.struct_time:
+
+def getting_time() -> List:
     """
     Возвращает текущее время в неформатированном виде
     :return:
     """
-    return time.localtime(time.time())
+    time_now_get = time.localtime(time.time())
+    time_now_out_get: List = [time_now_get.tm_mday,
+                              time_now_get.tm_mon,
+                              time_now_get.tm_year,
+                              time_now_get.tm_hour,
+                              time_now_get.tm_min,
+                              time_now_get.tm_sec,
+                              ]
+    return time_now_out_get
 
 
-def connect_to_db(dbname_con: str,
-                  user_con: str,
-                  password_con: str,
-                  host_con: str,
-                  port_con: str) -> psy.connect:
+def fixing_launch_bot():
     """
-    Соединение с БД PostgresQL
+    Фиксирует время старта бота.
+    Побочно проверяем доступность БД для записи
+    :return:
+    """
+    start_bot_time = datetime.datetime.now()
+    sql_query = """
+    INSERT INTO telegramm_bot_start 
+    (started_datetime)
+    VALUES
+    (%s)
     """
     try:
-        print(f"Подключение к БД {getting_time()}")
-        conn_con = psy.connect(
-                dbname=dbname_con,
-                user=user_con,
-                password=password_con,
-                host=host_con,
-                port=port_con,
-        )
-        print(f"БД подключена {getting_time()}")
-        return conn_con
+        con = wdb.connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
+        with con.cursor() as curr:
+            curr.execute(sql_query, (start_bot_time,))
+            con.commit()
+            print(f"Запрос {sql_query} выполнен в {getting_time()}")
+        con.close()
+        print(f"Connection is closed {getting_time()}")
+        divide_line(50)
+        print(f"Start bot at {start_bot_time}")
+        divide_line()
+    except psy.Error as err:
+        print(f"Ошибка: \n:{err}\n{getting_time()}")
+        raise err
+
+
+def divide_line(length: int = 30):
+    """Выводит разделительную линию длинной length в консоль
+    Args:
+        length (int): длинна разделительной линии
+        Значение по умолчанию 30
+    """
+    print (length * "-")
+
+
+
+def make_first_start_table():
+    """
+    Делает первую таблицу при запуске бота.
+    На самом деле, я думаю, она не нужна - лишнее обращение
+    и лишняя нагрузка на сервер.
+    То есть, БД можно сделать заранее или вручную или
+    написав отдельные скрипты.
+    :return:
+    """
+    # sql_query ="""
+    # DROP TABLE telegramm_user
+    # """
+    # write_to_db(sql_query)
+    sql_query = """
+    CREATE TABLE IF NOT EXISTS telegramm_user (
+    id SERIAL PRIMARY KEY,
+    telegramm_username varchar(32),
+    telegramm_id INTEGER NOT NULL,
+    telegramm_firstname varchar(100),
+    telegramm_lastname varchar(100),
+    started_date timestamp NOT NULL
+    );
+    """
+    wdb.write_to_db(sql_query)
+
+
+def write_users_data_to_db(message_wri: tt.Message):
+    """
+    Записывает данные пользователя, запустившего
+    бот командой /start
+
+    :param message_wri: экземпляр объекта TeleBot Message содержащий
+     сообщение от пользователя
+    :return:  None
+    """
+
+    user_name = message_wri.from_user.username
+    first_name = message_wri.from_user.first_name
+    last_name = message_wri.from_user.last_name
+    user_id = message_wri.from_user.id
+    started_date_wri = datetime.datetime.now()
+
+    sql_query = """
+    INSERT INTO telegramm_user 
+    (telegramm_username, telegramm_firstname, telegramm_lastname, telegramm_id, started_date)
+    VALUES
+    (%s, %s, %s, %s, %s);
+    """
+    # write_to_db(sql_query)
+
+    try:
+        con = wdb.connect_to_db(BOT_DB_NAME, BOT_DB_USER, BOT_DB_PASSWORD)
+        with con.cursor() as curr:
+            curr.execute(sql_query, (user_name, first_name, last_name, user_id, started_date_wri))
+            con.commit()
+            print(f"Запрос {sql_query} выполнен в {getting_time()}")
+        con.close()
+        print(f"Connection is closed {getting_time()}")
+        divide_line(50)
     except psy.Error as err:
         print(f"Ошибка: \n:{err}\n{getting_time()}")
         raise err
@@ -69,14 +165,25 @@ def close_connect(conn_close: psy.connect):
 def start_bot(message: tt.Message) -> None:
     """
     Обработка команды start и вывод кнопок под полем
-    текста ввода в telergamm
+    текста ввода в telergam
     :param message:
     :return:
     """
+    # ЗАкоментировал, так как таблица уже готова
+    # Что бы избежать лишних и ненужных запросов
+    # make_first_start_table()
+
+    write_users_data_to_db(message)
+
+    print(bot.user.id)
+    print(bot.user)
+    print(20 * "-")
+    print(message.from_user)
+
     markup = tt.ReplyKeyboardMarkup(resize_keyboard=True)
 
     # Создаю кнопки
-    # Будут расположены под текстовым полем ввода
+    # будут расположены под текстовым полем ввода
     btn1 = tt.KeyboardButton("🤯О проекте🤯")
     btn2 = tt.KeyboardButton("Сайт проекта")
     btn3 = tt.KeyboardButton("Контакты")
@@ -171,7 +278,7 @@ def send_site(self) -> None:
     if self:
         pass
 
-    web_open("mail.ru")
+    web_open("https://www.укпривилегия.рф/")
 
 
 # принимаю фото от пользователя
@@ -276,18 +383,14 @@ def processing_user_text(message):
         bot.reply_to(message, f"id: {message.from_user.id}")
 
 
-if __name__ == "__main__":
-    # print(f"Start bot at {getting_time()}")
-    # connection = connect_to_db()
-    conn = connect_to_db(settings.DB_NAME,
-                         settings.USER,
-                         settings.PASSWORD,
-                         settings.HOST,
-                         settings.PORT,
-                         )
-    curs_db = conn.cursor
+def main():
+    """
+    Основной блок программы.
+    :return:
+    """
+    fixing_launch_bot()
     bot.infinity_polling()
-    curs_db.close()
-    print(f"Cursor is closed {getting_time()}")
-    # conn.close()
-    input("Press any key...")
+
+
+if __name__ == "__main__":
+    main()
