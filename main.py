@@ -158,7 +158,7 @@ def close_connect(conn_close: psy.connect):
     """
     Закрывает соединение с БД
     """
-    conn_close.c
+    conn_close.close()
 
 
 @bot.message_handler(commands=["start"])
